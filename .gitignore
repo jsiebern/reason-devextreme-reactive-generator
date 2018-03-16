@@ -1,0 +1,11 @@
+*.swp
+
+.merlin
+_build
+node_modules
+*.install
+scripts/env.ts
+
+*.bs.js
+lib
+.idea
