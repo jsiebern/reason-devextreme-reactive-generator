@@ -1,3 +1,5 @@
+import * as util from 'util';
+
 export const colors = {
     reset: '\x1b[0m',
     yellow: '\x1b[33m',
@@ -10,7 +12,7 @@ export const colors = {
     white: '\x1b[37m',
 };
 
-const logColor = (color: string, log: any) => console.log(`${color}%s${colors.reset}`, log);
+const logColor = (color: string, log: any) => console.log(`${color}%s${colors.reset}`, util.inspect(log, false, null));
 
 export const warn = (log: any) => logColor(colors.yellow, log);
 export const error = (log: any) => logColor(colors.red, log);

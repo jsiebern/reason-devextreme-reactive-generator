@@ -30,7 +30,11 @@ export default function findComponents(directory = `${Env.ReactivePath}/packages
             }
 
             // The result can be accessed through the `m`-variable.
-            packages[packageName].push(path.join(indexPath, m[1]));
+            const name = path.basename(m[1]);
+            const docsPath = path.join(directory, packageName, 'docs', 'reference', name + '.md');
+            if (fs.existsSync(docsPath)) {
+                packages[packageName].push(docsPath);
+            }
         }
     });
 

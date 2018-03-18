@@ -13,7 +13,7 @@ declare interface PropType$ObjectSignature {
     raw: string,
     signature: {
         properties: {
-            [key: string]: string,
+            [key: string]: PropType,
         },
     },
 }
@@ -26,6 +26,7 @@ declare interface PropType$FunctionSignature {
         arguments: {
             name: string,
             type: PropType,
+            required?: boolean,
         }[],
         return: PropType
     },
@@ -54,11 +55,7 @@ declare interface PropType$Enum {
 declare interface PropType$Shape {
     name: 'shape',
     value: {
-        [name: string]: {
-            name: 'number' | 'string' | 'union',
-            required: boolean,
-            value?: PropType[],
-        }
+        [name: string]: PropType & { required: boolean },
     }
 }
 
