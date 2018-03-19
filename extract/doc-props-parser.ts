@@ -46,9 +46,9 @@ export default class DocPropsParser {
         // Function
         let match;
         if (match = typeTests.func.exec(propType)) {
-            const functionArgString = match[1];
+            let functionArgString = match[1];
             const returnType = match[2];
-            const argRegex = /([a-zA-Z0-9?]+): ({.+}|[^{]+),?/g;
+            const argRegex = /([a-zA-Z0-9?]+|\[[a-zA-Z0-9_.]*]\(.*\)): ({.+}|[^{,]+),?/g;
 
             const functionArgs = [];
             while ((match = argRegex.exec(functionArgString)) != null) {
@@ -88,13 +88,17 @@ export default class DocPropsParser {
         }
         // Specific Object
         else if (typeTests.specificObject.test(propType)) {
-            const objParts = propType.substr(propType.length - 2).substr(0, 1).split(',');
-            const partTest = /([a-zA-Z0-9?]*):(.*)/g;
+            const objParts = propType.substr(2,propType.length - 4).split(',');
+
             const props: docProp[] = [];
+            let match;
             objParts.forEach(p => {
-                if (match = partTest.exec(p)) {
-                    const pName = match[0];
-                    const pType = match[1];
+                if (match = /([a-zA-Z0-9?]*):(.*)/g.exec(p)) {
+                    if (objParts.join('').indexOf('from:') > -1) {
+                        Console.log(match);
+                    }
+                    const pName = match[1];
+                    const pType = match[2];
                     props.push({
                         name: pName.trim().replace('?', ''),
                         type: pType.trim(),

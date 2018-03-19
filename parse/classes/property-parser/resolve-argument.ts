@@ -12,13 +12,13 @@ export default function(name: string, required: boolean, type: PropType, origina
 
     const Parser = GetPropertyParser(type);
     if (Parser) {
-        const parser = new Parser(argumentProperty);
+        const parser = new Parser(argumentProperty, 'moduleOnly');
         parser.parse();
 
         return parser;
     }
     else {
-        Console.error(`resolveArgument: Could not find parser for Argument ${Console.colors.green}${originalProperty.component.name}/${originalProperty.name}/${name}/${type.name}${Console.colors.reset}`);
+        Console.error(`resolveArgument: Could not find parser for argument ${Console.colors.green}${originalProperty.component.name}/${originalProperty.name}/${name}/${type.name}${Console.colors.reset}`);
 
         return false;
     }

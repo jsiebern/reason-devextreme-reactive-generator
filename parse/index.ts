@@ -10,9 +10,9 @@ import ConstantStrings from './constant-strings';
 
 const outputDirectory = Path.join(__dirname, '../', 'output');
 const parseInit = () => {
-    const rawComponents = GetComponents();
+    const rawComponents = { 'dx-react-grid': GetComponents()['dx-react-grid'] };
 
-    const components: { [packageName: string]: Component[] } = Object.keys(rawComponents).reduce((obj, packageName) => ({...obj, [packageName]: rawComponents[packageName].map(jsonString => {
+    const components: { [packageName: string]: Component[] } = Object.keys(rawComponents).reduce((obj, packageName) => ({...obj, [packageName]: rawComponents[packageName].map((jsonString: string) => {
             try {
                 const json = JSON.parse(jsonString);
                 Console.info(`Parsing ${Console.colors.yellow}${packageName}/${json.name || json.displayName}${Console.colors.reset}`);

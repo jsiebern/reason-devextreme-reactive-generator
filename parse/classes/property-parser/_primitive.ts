@@ -1,4 +1,5 @@
 import * as Console from './../../helpers/console';
+import { generateAny, generateRandom } from './helpers';
 import Base from './base';
 
 const factory = (propertyType: PropType$Primitive) => {
@@ -61,13 +62,13 @@ const factory = (propertyType: PropType$Primitive) => {
                 case 'func':
                 case 'any':
                     // Todo: Analyse default value for 'func' (might be () => unit)
-                    this._reasonType = `'any_${Math.random().toString(36).substr(2, 1)}`;
+                    this._reasonType = generateAny();
                     break;
 
                 // Generic array
                 case 'array':
-                    this._reasonType = `[ | \`ArrayGeneric(array('any_${Math.random().toString(36).substr(2, 1)})) ]`;
-                    this._jsType = `'arrayGeneric_${Math.random().toString(36).substr(2, 1)}`;
+                    this._reasonType = `[ | \`ArrayGeneric(array(${generateAny()})) ]`;
+                    this._jsType = `'arrayGeneric_${generateRandom()}`;
                     break;
 
                 // Void return types

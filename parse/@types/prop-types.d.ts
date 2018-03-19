@@ -53,7 +53,7 @@ declare interface PropType$Enum {
 }
 
 declare interface PropType$Shape {
-    name: 'shape',
+    name: 'shape' | 'shapeArgument',
     value: {
         [name: string]: PropType & { required: boolean },
     }

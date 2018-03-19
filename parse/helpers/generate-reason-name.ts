@@ -12,7 +12,7 @@ const GenerateReasonName = (str: string, toUpper: boolean = true) => {
     while (str.indexOf('-') > -1) {
         str = str.replace('-', '_');
     }
-    if (['type', 'open', 'in'].indexOf(str) > -1) {
+    if (['type', 'open', 'in', 'ref', 'to', 'for'].indexOf(str) > -1) {
         str = `_${str}`;
     }
 

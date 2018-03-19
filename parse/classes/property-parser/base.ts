@@ -9,25 +9,36 @@ class PropertyParserBase {
     protected _module: string = '';
     protected _valid: boolean = true;
 
-    constructor(property: Property) {
+    protected _emitToComponent: boolean | 'moduleOnly';
+
+    constructor(property: Property, emitToComponent: boolean | 'moduleOnly' = true) {
         this._property = property;
+        this._emitToComponent = emitToComponent;
     }
 
     // Getters
-    protected get property() {
+    public get property() {
         return this._property;
     }
 
-    protected  get component() {
+    public  get component() {
         return this._property.component;
     }
 
-    protected get required() {
+    public get required() {
         return this._property.signature.required;
     }
 
     public get reasonType() {
         return this._reasonType;
+    }
+
+    public get valid() {
+        return this._valid;
+    }
+
+    public get jsType() {
+        return this._jsType;
     }
 
     // Parse functions
@@ -39,22 +50,26 @@ class PropertyParserBase {
     public executeParse() {}
 
     protected writeToComponent() {
-        if (this._valid && this._reasonType) {
-            let Make = `~${this.property.safeName}: ${this._reasonType},`;
-            let MakeProps = `~${this.property.safeName}: ${this._jsType ? this._jsType : this._reasonType},`;
-            let WrapJs = `~${this.property.safeName}=${this._wrapJs(this.property.safeName)},`;
+        if (this._emitToComponent !== false) {
+            if (this._valid && this._reasonType) {
+                let Make = `~${this.property.safeName}: ${this._reasonType},`;
+                let MakeProps = `~${this.property.safeName}: ${this._jsType ? this._jsType : this._reasonType},`;
+                let WrapJs = `~${this.property.safeName}=${this._wrapJs(this.property.safeName)},`;
 
-            // Optional
-            if (!this.property.signature.required) {
-                Make = `~${this.property.safeName}: option(${this._reasonType})=?,`;
-                MakeProps = `${MakeProps.replace(',', '=?')},`;
-                WrapJs = `${WrapJs.replace('=', '=?')}`;
+                // Optional
+                if (!this.property.signature.required) {
+                    Make = `~${this.property.safeName}: option(${this._reasonType})=?,`;
+                    MakeProps = `${MakeProps.replace(',', '=?')},`;
+                    WrapJs = `${WrapJs.replace('=', '=?')}`;
+                }
+
+                if (this._emitToComponent !== 'moduleOnly') {
+                    this.component.addToSection('Make', Make);
+                    this.component.addToSection('MakeProps', MakeProps);
+                    this.component.addToSection('WrapJs', WrapJs);
+                }
+                this.component.addToSection('Module', this._module);
             }
-
-            this.component.addToSection('Make', Make);
-            this.component.addToSection('MakeProps', MakeProps);
-            this.component.addToSection('WrapJs', WrapJs);
-            this.component.addToSection('Module', this._module);
         }
     }
 }
