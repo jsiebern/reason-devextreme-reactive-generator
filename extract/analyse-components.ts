@@ -4,7 +4,7 @@ import findComponents from './find-components';
 import findComponentDocs from './find-component-docs';
 import {existsSync, readFileSync} from 'fs';
 import * as path from 'path';
-import * as Console from './../src_ts/helpers/console';
+import * as Console from './../parse/helpers/console';
 
 import DocPropsParser from './doc-props-parser';
 const components = findComponents();
@@ -13,7 +13,7 @@ const componentDocs = findComponentDocs();
 type apiListType = { [packageName: string]: ComponentSignature[] };
 
 const getApis = (): apiListType => {
-    const apis: { [packageName: string]: any[] } = {};
+    const apis: apiListType = {};
     Object.keys(components).forEach(key => {
         apis[key] = [];
         components[key].forEach(componentPath => {
@@ -30,6 +30,7 @@ const getApis = (): apiListType => {
             try {
                 reactAPI = reactDocgen.parse(src);
                 reactAPI.basename = path.basename(componentPath);
+                reactAPI.importPath = `${key}/${reactAPI.displayName}`;
                 apis[key].push(reactAPI);
             } catch (err) {
             }

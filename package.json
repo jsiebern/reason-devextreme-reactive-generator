@@ -5,7 +5,8 @@
     "scripts": {
         "bsb": "npm link bs-platform; bsb -make-world;",
         "extract": "ts-node ./extract/extract.ts",
-        "parse": "ts-node ./parse/index.ts; refmt --in-place output/*.re; npm link bs-platform; bsb -make-world;"
+        "parse": "ts-node ./parse/index.ts",
+        "parsex": "ts-node ./parse/index.ts; refmt --in-place output/*.re; npm link bs-platform; bsb -make-world;"
     },
     "repository": "git@github.com:jsiebern/reason-devextreme-reactive-generator.git",
     "author": "Jonathan Siebern <jsiebern88@gmail.com>",

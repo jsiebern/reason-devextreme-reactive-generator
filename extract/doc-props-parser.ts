@@ -1,6 +1,6 @@
 import * as he from 'he';
-import { isPrimitive } from '../src_ts/helpers/identify-prop-type';
-import * as Console from './../src_ts/helpers/console';
+import { isPrimitive } from '../parse/helpers/identify-prop-type';
+import * as Console from './../parse/helpers/console';
 
 type docSection = { [sectionName: string]: string };
 type docDependencyResolver = (linkName: string, linkIdentifier: string) => DocPropsParser | false;

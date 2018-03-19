@@ -1,5 +1,5 @@
 declare interface PropType$Primitive {
-    name: 'string' | 'number' | 'boolean' | 'bool' | 'any' | 'void' | 'Object' | 'String' | 'func' | 'node' | 'object' | 'element' | 'any' | 'array' | 'Element' | 'Element<any>' | 'Function' | 'Node'
+    name: 'string' | 'number' | 'boolean' | 'bool' | 'any' | 'void' | 'Object' | 'String' | 'func' | 'node' | 'object' | 'element' | 'any' | 'array' | 'Element' | 'Element<any>' | 'Function' | 'Node' | 'ComponentType<object>'
 }
 
 declare interface PropType$Literal {
