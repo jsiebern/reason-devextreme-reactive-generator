@@ -1,5 +1,5 @@
 import * as Console from './../../helpers/console';
-import { generateAny, generateRandom } from './helpers';
+import { generateAny } from './helpers';
 import Base from './base';
 
 const factory = (propertyType: PropType$Primitive) => {
@@ -67,8 +67,8 @@ const factory = (propertyType: PropType$Primitive) => {
 
                 // Generic array
                 case 'array':
-                    this._reasonType = `[ | \`ArrayGeneric(array(${generateAny()})) ]`;
-                    this._jsType = `'arrayGeneric_${generateRandom()}`;
+                    this._reasonType = `array(${generateAny()})`;
+                    // this._jsType = `'arrayGeneric_${generateRandom()}`;
                     break;
 
                 // Void return types

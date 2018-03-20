@@ -1,3 +1,4 @@
+import * as Hash from 'object-hash';
 import ComponentFromJson from './../helpers/component-from-json';
 
 import Property from './property';
@@ -10,7 +11,7 @@ class Component {
     private _component: ComponentSignature;
 
     // Sections of the reason Component (properties can add to them as needed)
-    private _sectionModule: string[] = [];
+    private _sectionModule: { [hash: string]: string } = {};
     private _sectionMake: string[] = [];
     private _sectionMakeProps: string[] = [];
     private _sectionWrapJs: string[] = [];
@@ -34,8 +35,6 @@ class Component {
 
     private getSectionByKey(section: string) {
         switch (section) {
-            case 'Module':
-                return this._sectionModule;
             case 'Make':
                 return this._sectionMake;
             case 'MakeProps':
@@ -48,16 +47,26 @@ class Component {
     }
 
     public addToSection(section: 'Module' | 'Make' | 'MakeProps' | 'WrapJs', content: string) {
-        const addTo = this.getSectionByKey(section);
-        if (addTo) {
-            addTo.push(content);
+        if (section === 'Module') {
+            this._sectionModule[Hash(content)] = content;
+        }
+        else {
+            const addTo = this.getSectionByKey(section);
+            if (addTo) {
+                addTo.push(content);
+            }
         }
     }
 
     private renderSection(section: 'Module' | 'Make' | 'MakeProps' | 'WrapJs') {
-        const renderFrom = this.getSectionByKey(section);
-        if (renderFrom && renderFrom.length) {
-            return renderFrom.join('\n');
+        if (section === 'Module') {
+            return Object.keys(this._sectionModule).map(key => this._sectionModule[key]).join('\n');
+        }
+        else {
+            const renderFrom = this.getSectionByKey(section);
+            if (renderFrom && renderFrom.length) {
+                return renderFrom.join('\n');
+            }
         }
         return '';
     }
@@ -81,7 +90,7 @@ class Component {
             module ${this.name} = {
                 ${this.renderSection('Module')}
                 ${hasProps ? `[@bs.obj] external makeProps : (${this.renderSection('MakeProps')} unit) => _ = "";` : ''}
-                [@bs.module "${this._component.importPath}"] external reactClass : ReasonReact.reactClass = "default";
+                [@bs.module "${this._component.importPath}"] external reactClass : ReasonReact.reactClass = "${this._component.importName || 'default'}";
                 let make = (
                     ${this.renderSection('Make')}
                     children

@@ -30,7 +30,8 @@ const getApis = (): apiListType => {
             try {
                 reactAPI = reactDocgen.parse(src);
                 reactAPI.basename = path.basename(componentPath);
-                reactAPI.importPath = `${key}/${reactAPI.displayName}`;
+                reactAPI.importPath = `@devexpress/${key}`;
+                reactAPI.importName = reactAPI.displayName;
                 apis[key].push(reactAPI);
             } catch (err) {
             }

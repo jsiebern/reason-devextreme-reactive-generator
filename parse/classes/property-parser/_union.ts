@@ -1,6 +1,6 @@
 import * as Console from './../../helpers/console';
 import { upperFirst } from 'lodash';
-import { generateAny, generateRandom } from './helpers';
+import { generateAny, generateRandom, convertUnionToEnum } from './helpers';
 import Base from './base';
 import * as Identify from './../../helpers/identify-prop-type';
 import ResolveArgument from './resolve-argument';
@@ -122,8 +122,21 @@ const factory = (propertyType: PropType$Union) => {
             }
         }
 
+        private extractEnum() {
+            const extracted = convertUnionToEnum(this._propertyType);
+            if (extracted.value.length) {
+                return this.resolveType(extracted);
+            }
+
+            return false;
+        }
+
         private resolveUnionProps(): Base[] {
-            return this._propertyType.value != null ? this._propertyType.value.reduce((arr, pType) => {
+            const unionProps = this._propertyType.value != null ? this._propertyType.value.reduce((arr, pType) => {
+                // Do not include literals as they will be extracted into an enum
+                if (pType.name === 'literal') {
+                    return arr;
+                }
                 if (pType.name === 'enum') {
                     this._hasEnum = true;
                 }
@@ -136,6 +149,13 @@ const factory = (propertyType: PropType$Union) => {
                 }
                 return arr;
             }, []) : [];
+            const extractedEnum = this.extractEnum();
+            if (extractedEnum) {
+                this._hasEnum = true;
+                unionProps.push(extractedEnum);
+            }
+
+            return unionProps;
         }
 
         private resolveType(type: PropType) {

@@ -15,7 +15,7 @@ const factory = (propertyType: PropType$Shape) => {
         public executeParse() {
             const shapeArgs = this.resolveShape();
             if (shapeArgs.length) {
-                const dictSet = shapeArgs.map(arg => `Js.Dict.set(returnObj, "${arg.key}", ${this._funcGet}(madeObj, "${arg.keySafe}"));`).join('\n');
+                const dictSet = shapeArgs.map(arg => `Js.Dict.set(returnObj, "${arg.key}", toJsUnsafe(${arg.wrapJs(`${this._funcGet}(madeObj, "${arg.keySafe}")`)}));`).join('\n');
                 this._module = `
                     type ${this._typeName};
                     [@bs.obj] external ${this._funcMake} : (${shapeArgs.map(arg => {
@@ -24,7 +24,7 @@ const factory = (propertyType: PropType$Shape) => {
                             makeProps +='=?';
                         }
                         return makeProps;
-                    }).join(',')}, unit) => _ = "";
+                    }).join(',')}, unit) => ${this._typeName} = "";
                     
                     [@bs.get_index] external ${this._funcGet} : (${this._typeName}, string) => 'a = "";
                     let ${this._funcConvert} = (madeObj: ${this.property.signature.required ? this._typeName : `option(${this._typeName})`}) => {
@@ -49,7 +49,7 @@ const factory = (propertyType: PropType$Shape) => {
         }
 
         private resolveShape() {
-            const shapes: { key: string, keySafe: string, type: string, jsType: string, required: boolean }[] = [];
+            const shapes: { key: string, keySafe: string, type: string, wrapJs: (k: string) => string, jsType: string, required: boolean }[] = [];
 
             Object.keys(this._propertyType.value).forEach(key => {
                 const type = this._propertyType.value[key];
@@ -59,6 +59,7 @@ const factory = (propertyType: PropType$Shape) => {
                         key,
                         keySafe: GenerateReasonName(key, false),
                         type: argumentParser.reasonType,
+                        wrapJs: argumentParser.wrapJs,
                         jsType: argumentParser.jsType,
                         required: type.required,
                     });

@@ -18,6 +18,7 @@ declare interface ComponentSignature {
     },
     filename: string,
     importPath: string,
+    importName?: string,
     inheritsFrom: string,
     props: {
         [propName: string]: PropSignature

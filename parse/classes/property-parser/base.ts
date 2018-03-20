@@ -41,6 +41,10 @@ class PropertyParserBase {
         return this._jsType;
     }
 
+    public get wrapJs() {
+        return this._wrapJs;
+    }
+
     // Parse functions
     public parse() {
         this.executeParse();

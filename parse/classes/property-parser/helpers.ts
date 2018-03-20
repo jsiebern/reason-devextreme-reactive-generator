@@ -1,7 +1,7 @@
 import * as Identify from './../../helpers/identify-prop-type';
 
 export function generateRandom() {
-    return Math.random().toString(36).substr(2, 3);
+    return `r${Math.random().toString(36).substr(2, 3)}`;
 }
 
 export function generateAny(ident: string = 'any') {

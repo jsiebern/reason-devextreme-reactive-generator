@@ -1,8 +1,5 @@
 import GenerateReasonName, { isNumeric } from './../../helpers/generate-reason-name';
-// import * as Console from './../../helpers/console';
-// import { generateAny, generateRandom } from './helpers';
 import Base from './base';
-import { generateRandom } from './helpers';
 
 const factory = (propertyType: PropType$Enum) => {
     return class EnumParser extends Base {
@@ -38,7 +35,7 @@ const factory = (propertyType: PropType$Enum) => {
             });
 
             const enumValuesReason = enumKeys.map(e => GenerateReasonName(e));
-            const enumName = `${this.property.safeName}_${generateRandom()}`;
+            const enumName = this.property.safeName;
 
             if (this._isNumeric) {
                 this._module = `
@@ -56,14 +53,13 @@ const factory = (propertyType: PropType$Enum) => {
             }
 
             this._reasonType = enumName;
+            this._jsType = enumName;
             if (this.property.signature.required) {
                 this._wrapJs = (name) => `${enumName}ToJs(${name})`;
             }
             else {
                 this._wrapJs = (name) => `Js.Option.map([@bs] (v => ${enumName}ToJs(v)), ${name})`;
             }
-
-            this._jsType = this._isNumeric ? 'int' : 'string';
         }
     }
 };

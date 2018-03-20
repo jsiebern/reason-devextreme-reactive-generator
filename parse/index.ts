@@ -10,7 +10,7 @@ import ConstantStrings from './constant-strings';
 
 const outputDirectory = Path.join(__dirname, '../', 'output');
 const parseInit = () => {
-    const rawComponents = { 'dx-react-grid': GetComponents()['dx-react-grid'] };
+    const rawComponents = GetComponents();
 
     const components: { [packageName: string]: Component[] } = Object.keys(rawComponents).reduce((obj, packageName) => ({...obj, [packageName]: rawComponents[packageName].map((jsonString: string) => {
             try {
@@ -38,6 +38,8 @@ const parseInit = () => {
     Object.keys(rendered).forEach(packageName => {
         Fs.writeFileSync(Path.join(outputDirectory, `${upperFirst(camelCase(packageName.replace('dx-react-', '')))}.re`), ConstantStrings + rendered[packageName]);
     });
+
+    // Todo: Generate .rei files
 
 };
 
