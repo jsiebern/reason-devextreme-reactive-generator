@@ -1,4 +1,8 @@
-export const isPrimitive = (prop: PropType | { name: string }): prop is PropType$Primitive => [ 'string' , 'number' , 'boolean' , 'bool' , 'any' , 'void' , 'Object' , 'String' , 'func' , 'node' , 'object' , 'element' , 'any' , 'array' , 'Element' , 'Element<any>' , 'Function' , 'Node' , 'ComponentType<object>' ].indexOf(prop.name) > -1;
+export const isPropType = (prop: any): prop is PropType => typeof prop.name !== 'undefined';
+
+export const isPrimitive = (prop: PropType | { name: string }): prop is PropType$Primitive => [ 'string' , 'int', 'float', 'number' , 'boolean' , 'bool' , 'any' , 'void' , 'Object' , 'String' , 'node' , 'object' , 'element' , 'any' , 'array' , 'Element' , 'ReactElement' , 'Element<any>'  , 'Node' , 'ComponentType<object>' ].indexOf(prop.name) > -1;
+
+export const isCustom = (prop: PropType): prop is PropType$Custom => (prop.name === 'custom');
 
 export const isLiteral = (prop: PropType): prop is PropType$Literal => (prop.name === 'literal');
 
@@ -17,7 +21,8 @@ export const isShapeArgument = (prop: PropType): prop is PropType$Shape => (prop
 
 export const isArrayOf = (prop: PropType): prop is PropType$ArrayOf => (prop.name === 'arrayOf');
 
+export const isFunc = (prop: PropType): prop is PropType$Func => (prop.name === 'func' || prop.name === 'Function');
 export const isCallBackName = (name: string) => new RegExp(/^on[A-Z]/g).test(name);
-export const isCallback = (propName: string, prop: PropType): prop is PropType$Callback => (prop.name === 'func' && isCallBackName(propName));
+export const isCallback = (propName: string, prop: PropType): prop is PropType$Callback => (isFunc(prop) && isCallBackName(propName));
 
 export const isUnionEnum = (union: PropType) => isUnion(union) && union.value != null ? union.value.reduce((literalsOnly, unionProp) => !literalsOnly ? literalsOnly : unionProp.name === 'literal', true) : false;

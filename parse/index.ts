@@ -35,6 +35,7 @@ const parseInit = () => {
             return c.render();
         }).join('\n')}), {});
 
+    // Write Module files
     Object.keys(rendered).forEach(packageName => {
         Fs.writeFileSync(Path.join(outputDirectory, `${upperFirst(camelCase(packageName.replace('dx-react-', '')))}.re`), ConstantStrings + rendered[packageName]);
     });

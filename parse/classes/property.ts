@@ -8,13 +8,15 @@ class Property {
     private _component: Component;
 
     // Raw Prop Values
-    private _signature: PropSignature;
-    private _name: string;
+    readonly _signature: PropSignature;
+    readonly _name: string;
+    readonly _description: string;
 
     constructor(name: string, propSignature: PropSignature, componentReference: Component, autoParse: boolean = true) {
         this._component = componentReference;
         this._signature = propSignature;
         this._name = name;
+        this._description = propSignature.description;
         if (autoParse) {
             this.parse();
         }
@@ -37,7 +39,15 @@ class Property {
         return this._signature;
     }
 
-    private parse() {
+    public get description() {
+        return this._description;
+    }
+
+    public set component(componentReference: Component) {
+        this._component = componentReference;
+    }
+
+    public parse() {
         if (this._signature.type != null) {
             const Parser = GetPropertyParser(this._signature.type);
             if (Parser) {

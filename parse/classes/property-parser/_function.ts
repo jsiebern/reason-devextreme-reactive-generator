@@ -14,7 +14,7 @@ const factory = (propertyType: PropType$FunctionSignature) => {
             if (this._signature.arguments.length) {
                 const args = this.parseArguments();
                 if (args.length) {
-                    const shouldLabel = args.reduce((shouldLabel, arg) => (shouldLabel ? shouldLabel : arg.required === false), false);
+                    const shouldLabel = args.reduce((shouldLabel, arg) => (shouldLabel ? shouldLabel : !arg.required), false);
 
                     if (shouldLabel) {
                         argString = `(${

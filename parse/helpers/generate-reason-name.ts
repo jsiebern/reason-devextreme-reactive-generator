@@ -7,7 +7,15 @@ export const isNumeric = (obj: any) => {
 }
 
 const GenerateReasonName = (str: string, toUpper: boolean = true) => {
-    str = toUpper ? capitalize(str) : uncapitalize(str);
+    if (toUpper) {
+        str = capitalize(str);
+    }
+    else {
+        const firstLetter = str.substr(0, 1);
+        if (firstLetter === firstLetter.toUpperCase()) {
+            str = `_${str}`;
+        }
+    }
 
     while (str.indexOf('-') > -1) {
         str = str.replace('-', '_');

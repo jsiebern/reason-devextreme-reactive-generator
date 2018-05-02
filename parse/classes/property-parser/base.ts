@@ -1,4 +1,5 @@
 import Property from './../property';
+import Plugins from './plugins';
 
 class PropertyParserBase {
     protected _property: Property;
@@ -53,7 +54,16 @@ class PropertyParserBase {
 
     public executeParse() {}
 
+    private runPlugins() {
+        Object.keys(Plugins).map(pluginKey => Plugins[pluginKey]).forEach(pluginClass => {
+            const plugin = new pluginClass(this);
+            plugin.modify();
+        });
+    }
+
     protected writeToComponent() {
+        this.runPlugins();
+
         if (this._emitToComponent !== false) {
             if (this._valid && this._reasonType) {
                 let Make = `~${this.property.safeName}: ${this._reasonType},`;

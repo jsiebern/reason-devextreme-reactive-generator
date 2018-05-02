@@ -139,6 +139,12 @@ export default class DocPropsParser {
             }
 
             if (this._docSections[linkName] != null) {
+                // Prevent recursion and mark as any
+                if (this._docSections[linkName].indexOf(`[${linkName}]`) > -1) {
+                    return {
+                        name: 'any',
+                    };
+                }
                 const inputProps = this.extractInputProps(linkName);
                 return this.shapeFromProps(inputProps);
             }
@@ -199,16 +205,16 @@ export default class DocPropsParser {
         if (this._docSections[sectionName] != null) {
             const sectionContent = this._docSections[sectionName];
             const propsString = this.getDocTableRows(sectionContent);
-            const propsRegex = /^(.*)\|(.*)\|(.*)$/mg;
+            const propsRegex = new RegExp(/^(.*)\|(.*)\|(.*)$/mg);
             let propsMatch;
             while ((propsMatch = propsRegex.exec(propsString)) !== null) {
-                propsMatch = propsMatch.map(s => he.decode(s));
+                const propsMatchDecoded = propsMatch.map(s => he.decode(s));
                 const prop: docProp = {
-                    name: propsMatch[1].trim().replace('?', ''),
-                    type: propsMatch[2].trim(),
-                    parsedType: this.parsePropType(propsMatch[2].trim()),
-                    description: propsMatch[3].trim(),
-                    optional: propsMatch[1].indexOf('?') > -1,
+                    name: propsMatchDecoded[1].trim().replace('?', ''),
+                    type: propsMatchDecoded[2].trim(),
+                    parsedType: this.parsePropType(propsMatchDecoded[2].trim()),
+                    description: propsMatchDecoded[3].trim(),
+                    optional: propsMatchDecoded[1].indexOf('?') > -1,
                 };
                 inputProps.push(prop);
             }
@@ -269,7 +275,7 @@ export default class DocPropsParser {
             }
         });
 
-        return retContent;
+        return retContent.trim();
     };
 
     extractProps = (sectionName: string) => {

@@ -19,13 +19,6 @@ const factory = (propertyType: PropType$Primitive) => {
                 case 'bool':
                 case 'boolean':
                     this._reasonType = 'bool';
-                    this._jsType = 'Js.boolean';
-                    if (this.required) {
-                        this._wrapJs = (name) => `Js.Boolean.to_js_boolean(${name})`;
-                    }
-                    else {
-                        this._wrapJs = (name) => `Js.Option.map([@bs] ((v) => Js.Boolean.to_js_boolean(v)), ${name})`;
-                    }
                     break;
 
                 // -- Number
@@ -40,12 +33,19 @@ const factory = (propertyType: PropType$Primitive) => {
                         this._wrapJs = (name) => `Js.Option.map([@bs] ((v) => unwrapValue(v)), ${name})`;
                     }
                     break;
+                case 'int':
+                    this._reasonType = 'int';
+                    break;
+                case 'float':
+                    this._reasonType = 'float';
+                    break;
 
                 // React Element
                 case 'node':
                 case 'Node':
                 case 'element':
                 case 'Element':
+                case 'ReactElement':
                 case 'ComponentType<object>':
                 case 'Element<any>':
                     this._reasonType = 'ReasonReact.reactElement';
@@ -58,17 +58,13 @@ const factory = (propertyType: PropType$Primitive) => {
                     break;
 
                 // Function without Signature / Any
-                case 'Function':
-                case 'func':
                 case 'any':
-                    // Todo: Analyse default value for 'func' (might be () => unit)
                     this._reasonType = generateAny();
                     break;
 
                 // Generic array
                 case 'array':
                     this._reasonType = `array(${generateAny()})`;
-                    // this._jsType = `'arrayGeneric_${generateRandom()}`;
                     break;
 
                 // Void return types

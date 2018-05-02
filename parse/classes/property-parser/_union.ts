@@ -1,6 +1,6 @@
 import * as Console from './../../helpers/console';
 import { upperFirst } from 'lodash';
-import { generateAny, generateRandom, convertUnionToEnum } from './helpers';
+import { generateAny, convertUnionToEnum } from './helpers';
 import Base from './base';
 import * as Identify from './../../helpers/identify-prop-type';
 import ResolveArgument from './resolve-argument';
@@ -61,6 +61,9 @@ const factory = (propertyType: PropType$Union) => {
                         reasonTypes.push(`Object(${unionProp.reasonType})`);
                         shapes.push(unionProp.reasonType);
                     }
+                    else if (Identify.isFunc(type)) {
+                        reasonTypes.push(`Callback(${unionProp.reasonType})`);
+                    }
                     else if (Identify.isArrayOf(type)) {
                         if (unionProp.reasonType.substr(0, 1) === '[') {
                             unionProp.reasonType
@@ -70,6 +73,9 @@ const factory = (propertyType: PropType$Union) => {
                                 .map(t => t.trim().replace('`', ''))
                                 .filter(t => t !== '')
                                 .forEach(t => reasonTypes.push(t));
+                        }
+                        else if (unionProp.reasonType.substr(0, 5) === 'array') {
+                            reasonTypes.push(`Array(${unionProp.reasonType})`);
                         }
                         else {
                             const arrayOfType = unionProp.reasonType.replace('`', '');
@@ -96,7 +102,7 @@ const factory = (propertyType: PropType$Union) => {
                     (fun
                         ${enums.map(x => `| \`Enum(v) => unwrapValue(\`String(${x}ToJs(v)))`).join('\n')}
                         ${enumArrays.map(x => `| \`EnumArray(v) => unwrapValue(\`Element(Array.map(${x}ToJs, v)))`).join('\n')}
-                        ${shapes.map(x => `| \`Object(v) => unwrapValue(\`Element(${x}ToJs(v)))`).join('\n')}
+                        ${shapes.map(x => `| \`Object(v) => unwrapValue(\`Element(convert${upperFirst(x.substr(4))}(v)))`).join('\n')}
                         ${reasonTypes.length > combinedLength ? '| v => unwrapValue(v)' : ''}
                     )(${name})
                 `;
@@ -111,7 +117,7 @@ const factory = (propertyType: PropType$Union) => {
                     Js.Option.map([@bs] ((v) => switch v {
                         ${enums.map(x => `| \`Enum(v) => unwrapValue(\`String(${x}ToJs(v)))`).join('\n')}
                         ${enumArrays.map(x => `| \`EnumArray(v) => unwrapValue(\`Element(Array.map(${x}ToJs, v)))`).join('\n')}
-                        ${shapes.map(x => `| \`Object(v) => unwrapValue(\`Element(${x}ToJs(v)))`).join('\n')}
+                        ${shapes.map(x => `| \`Object(v) => unwrapValue(\`Element(convert${upperFirst(x.substr(4))}(v)))`).join('\n')}
                         ${reasonTypes.length > combinedLength ? '| v => unwrapValue(v)' : ''}
                     }), ${name})
                 `;
@@ -159,7 +165,8 @@ const factory = (propertyType: PropType$Union) => {
         }
 
         private resolveType(type: PropType) {
-            const argumentParser = ResolveArgument(generateRandom(), true, type, this._property);
+            const argName = `${this.property.name}_${type.name}`;
+            const argumentParser = ResolveArgument(argName, true, type, this._property);
             if (argumentParser) {
                 return argumentParser;
             }
