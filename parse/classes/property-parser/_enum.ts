@@ -1,6 +1,5 @@
 import GenerateReasonName, { isNumeric } from './../../helpers/generate-reason-name';
 import Base from './base';
-import { generateAny } from './helpers';
 
 const factory = (propertyType: PropType$Enum) => {
     return class EnumParser extends Base {
@@ -54,7 +53,7 @@ const factory = (propertyType: PropType$Enum) => {
             }
 
             this._reasonType = enumName;
-            this._jsType = this._isNumeric ? generateAny('number') : 'string';
+            this._jsType = enumName;
             if (this.property.signature.required) {
                 this._wrapJs = (name) => `${enumName}ToJs(${name})`;
             }
