@@ -19,6 +19,12 @@ const factory = (propertyType: PropType$ArrayOf) => {
                 }
                 else if (type.name === 'number') {
                     reasonType = ['IntArray(array(int))', 'FloatArray(array(float))'];
+                    if (this.required) {
+                        this._wrapJs = (name) => `unwrapValue(${name})`;
+                    }
+                    else {
+                        this._wrapJs = (name) => `Js.Option.map([@bs] ((v) => unwrapValue(v)), ${name})`;
+                    }
                 }
             }
             else {
