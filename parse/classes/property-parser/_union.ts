@@ -11,7 +11,6 @@ const factory = (propertyType: PropType$Union) => {
 
         private _hasEnum = false;
         private _hasEnumArray = false;
-        private _hasShape = false;
 
         public executeParse() {
             const unionProps = this.resolveUnionProps();
@@ -19,11 +18,10 @@ const factory = (propertyType: PropType$Union) => {
             const reasonTypes: string[] = [];
             const enums: string[] = [];
             const enumArrays: string[] = [];
-            const shapes: string[] = [];
 
             unionProps.forEach(unionProp => {
                 const type = unionProp.property.signature.type;
-                
+
                 if (type != null) {
                     if (Identify.isPrimitive(type)) {
                         const pType = unionProp.reasonType.indexOf('\'any') === 0 ? 'any' : unionProp.reasonType;
@@ -59,7 +57,6 @@ const factory = (propertyType: PropType$Union) => {
                     }
                     else if (Identify.isShape(type)) {
                         reasonTypes.push(`Object(${unionProp.reasonType})`);
-                        shapes.push(unionProp.reasonType);
                     }
                     else if (Identify.isFunc(type)) {
                         reasonTypes.push(`Callback(${unionProp.reasonType})`);
@@ -95,14 +92,13 @@ const factory = (propertyType: PropType$Union) => {
             this._reasonType = `[ ${reasonTypes.map(type => `| \`${type} `).join('')} ]`;
             this._jsType = generateAny('union');
 
-            const combinedLength = enums.length + enumArrays.length + shapes.length;
+            const combinedLength = enums.length + enumArrays.length;
             if (this.property.signature.required) {
-                if (this._hasEnum || this._hasShape || this._hasEnumArray) {
+                if (this._hasEnum || this._hasEnumArray) {
                     this._wrapJs = (name) => `
                     (fun
                         ${enums.map(x => `| \`Enum(v) => unwrapValue(\`String(${x}ToJs(v)))`).join('\n')}
                         ${enumArrays.map(x => `| \`EnumArray(v) => unwrapValue(\`Element(Array.map(${x}ToJs, v)))`).join('\n')}
-                        ${shapes.map(x => `| \`Object(v) => unwrapValue(\`Element(convert${upperFirst(x.substr(4))}(v)))`).join('\n')}
                         ${reasonTypes.length > combinedLength ? '| v => unwrapValue(v)' : ''}
                     )(${name})
                 `;
@@ -112,12 +108,11 @@ const factory = (propertyType: PropType$Union) => {
                 }
             }
             else {
-                if (this._hasEnum || this._hasShape || this._hasEnumArray) {
+                if (this._hasEnum || this._hasEnumArray) {
                     this._wrapJs = (name) => `
                     Js.Option.map([@bs] ((v) => switch v {
                         ${enums.map(x => `| \`Enum(v) => unwrapValue(\`String(${x}ToJs(v)))`).join('\n')}
                         ${enumArrays.map(x => `| \`EnumArray(v) => unwrapValue(\`Element(Array.map(${x}ToJs, v)))`).join('\n')}
-                        ${shapes.map(x => `| \`Object(v) => unwrapValue(\`Element(convert${upperFirst(x.substr(4))}(v)))`).join('\n')}
                         ${reasonTypes.length > combinedLength ? '| v => unwrapValue(v)' : ''}
                     }), ${name})
                 `;
@@ -145,9 +140,6 @@ const factory = (propertyType: PropType$Union) => {
                 }
                 if (pType.name === 'enum') {
                     this._hasEnum = true;
-                }
-                else if (pType.name === 'shape') {
-                    this._hasShape = true;
                 }
                 const resolved = this.resolveType(pType);
                 if (resolved) {

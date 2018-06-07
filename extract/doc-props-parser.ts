@@ -94,9 +94,6 @@ export default class DocPropsParser {
             let match;
             objParts.forEach(p => {
                 if (match = /([a-zA-Z0-9?]*):(.*)/g.exec(p)) {
-                    if (objParts.join('').indexOf('from:') > -1) {
-                        Console.log(match);
-                    }
                     const pName = match[1];
                     const pType = match[2];
                     props.push({

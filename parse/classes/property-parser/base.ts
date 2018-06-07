@@ -73,7 +73,8 @@ class PropertyParserBase {
                 // Optional
                 if (!this.property.signature.required) {
                     Make = `~${this.property.safeName}: option(${this._reasonType})=?,`;
-                    MakeProps = `${MakeProps.replace(',', '=?')},`;
+                    const pos = MakeProps.lastIndexOf(',');
+                    MakeProps = MakeProps.substring(0, pos) + '=?,' + MakeProps.substring(pos + 1);
                     WrapJs = `${WrapJs.replace('=', '=?')}`;
                 }
 
