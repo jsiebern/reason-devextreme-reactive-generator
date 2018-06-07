@@ -1,11 +1,13 @@
 import Base from './base';
 import ResolveArgument from './resolve-argument';
 import GenerateReasonName from '../../helpers/generate-reason-name';
+import { upperFirst } from 'lodash';
+import { generateAny } from './helpers';
 
 const factory = (propertyType: PropType$Shape) => {
     return class ShapeParser extends Base {
         private _propertyType: PropType$Shape = propertyType;
-        private _typeName = this.property.safeName;
+        private _moduleName = upperFirst(this.property.safeName);
 
         public executeParse() {
             const shapeArgs = this.resolveShape();
@@ -25,20 +27,78 @@ const factory = (propertyType: PropType$Shape) => {
                     return arr;
                 }, []).join(',');
                 this._module = `
-                    [@bs.deriving abstract]
-                    type ${this._typeName}${anyTypes ? `(${anyTypes})` : ''} = {
-                        ${shapeArgs.map(arg => `
-                            ${!arg.required ? '[@bs.optional] ' : ''}
-                            ${arg.key !== arg.keySafe ? `[@bs.as "${arg.key}"]` : ''}
-                            ${arg.keySafe}: ${arg.type === 'Js.t({..})' ? 'Js.t({..} as \'a)' : arg.type}
-                        `).join(',')}
+                    module ${this._moduleName} {
+                        [@bs.deriving abstract]
+                        type t${anyTypes ? `(${anyTypes})` : ''} = {
+                            ${shapeArgs.map(arg => `
+                                ${!arg.required ? '[@bs.optional]' : ''}
+                                ${arg.key !== arg.keySafe ? `[@bs.as "${arg.key}"]` : ''}
+                                ${arg.keySafe}: ${arg.type === 'Js.t({..})' ? 'Js.t({..} as \'a)' : arg.type}
+                            `).join(',')}
+                        };
+                        let make = t;
+
+                        let unwrap = (obj: ${this.property.signature.required ? `t${anyTypes ? `(${anyTypes})` : ''}` : `option(t${anyTypes ? `(${anyTypes})` : ''})`}) => {
+                            ${this.property.signature.required ? `
+                                let unwrappedMap = Js.Dict.empty();
+                                ${shapeArgs.map(arg => arg.required ? `
+                                    unwrappedMap
+                                        |. Js.Dict.set(
+                                            "${arg.key}",
+                                            ${arg.wrapJs(`obj |. ${arg.keySafe}`)}
+                                            |. toJsUnsafe
+                                        );
+                                ` : `
+                                    switch (${arg.wrapJs(`obj |. ${arg.keySafe}`)}) {
+                                        | Some(v) =>
+                                            unwrappedMap
+                                                |. Js.Dict.set(
+                                                    "${arg.key}",
+                                                    v
+                                                    |. toJsUnsafe
+                                                );
+                                        | None => ()    
+                                    };
+                                `).join('')}
+                                unwrappedMap;
+                            ` : `
+                                switch (obj) {
+                                    | Some(obj) =>
+                                        let unwrappedMap = Js.Dict.empty();
+                                        ${shapeArgs.map(arg => arg.required ? `
+                                            unwrappedMap
+                                                |. Js.Dict.set(
+                                                    "${arg.key}",
+                                                    ${arg.wrapJs(`obj |. ${arg.keySafe}`)}
+                                                    |. toJsUnsafe
+                                                );
+                                        ` : `
+                                            switch (${arg.wrapJs(`obj |. ${arg.keySafe}`)}) {
+                                                | Some(v) =>
+                                                    unwrappedMap
+                                                        |. Js.Dict.set(
+                                                            "${arg.key}",
+                                                            v
+                                                            |. toJsUnsafe
+                                                        );
+                                                | None => ()    
+                                            };
+                                        `).join('')}
+                                        Some(unwrappedMap);
+                                    | None => None
+                                };
+                            `}
+                            
+                        };
                     };
                 `;
 
-                this._reasonType = this._typeName;
+                this._wrapJs = (name) => `${this._moduleName}.unwrap(${name})`;
+                this._reasonType = `${this._moduleName}.t`;
                 if (anyTypes) {
-                    this._reasonType = `${this._reasonType}(${anyTypes})`;
+                    this._reasonType = `${this._moduleName}.t(${anyTypes})`;
                 }
+                this._jsType = generateAny();
             }
             else {
                 this._valid = false;
