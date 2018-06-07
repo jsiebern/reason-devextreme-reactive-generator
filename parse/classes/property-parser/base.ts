@@ -1,5 +1,6 @@
 import Property from './../property';
 import Plugins from './plugins';
+import { reservedNames } from '../../helpers/generate-reason-name';
 
 class PropertyParserBase {
     protected _property: Property;
@@ -66,9 +67,14 @@ class PropertyParserBase {
 
         if (this._emitToComponent !== false) {
             if (this._valid && this._reasonType) {
+                let makeName = this.property.safeName;
+                let index;
+                if ((index = reservedNames.indexOf(makeName.replace('_', ''))) > -1) {
+                    makeName = `_${reservedNames[index]}`;
+                }
                 let Make = `~${this.property.safeName}: ${this._reasonType},`;
-                let MakeProps = `~${this.property.safeName}: ${this._jsType ? this._jsType : this._reasonType},`;
-                let WrapJs = `~${this.property.safeName}=${this._wrapJs(this.property.safeName)},`;
+                let MakeProps = `~${makeName}: ${this._jsType ? this._jsType : this._reasonType},`;
+                let WrapJs = `~${makeName}=${this._wrapJs(this.property.safeName)},`;
 
                 // Optional
                 if (!this.property.signature.required) {
