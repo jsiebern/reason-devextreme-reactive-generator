@@ -20,9 +20,10 @@ const factory = (propertyType: PropType$Shape) => {
                         arr.push(`${any[0]}`);
                     }
 
-                    if (arg.type === 'Js.t({..})') {
+                    if (arg.type.includes('Js.t({..})')) {
                         // @ts-ignore
                         arr.push('\'a');
+                        arg.type = arg.type.replace('Js.t({..})', 'Js.t({..}) as \'a');
                     }
                     return arr;
                 }, []).join(',');
@@ -43,19 +44,19 @@ const factory = (propertyType: PropType$Shape) => {
                                 let unwrappedMap = Js.Dict.empty();
                                 ${shapeArgs.map(arg => arg.required ? `
                                     unwrappedMap
-                                        |. Js.Dict.set(
+                                        -> Js.Dict.set(
                                             "${arg.key}",
-                                            ${arg.wrapJs(`obj |. ${arg.keySafe}`)}
-                                            |. toJsUnsafe
+                                            ${arg.wrapJs(`obj -> ${arg.keySafe}Get`)}
+                                            -> toJsUnsafe
                                         );
                                 ` : `
-                                    switch (${arg.wrapJs(`obj |. ${arg.keySafe}`)}) {
+                                    switch (${arg.wrapJs(`obj -> ${arg.keySafe}Get`)}) {
                                         | Some(v) =>
                                             unwrappedMap
-                                                |. Js.Dict.set(
+                                                -> Js.Dict.set(
                                                     "${arg.key}",
                                                     v
-                                                    |. toJsUnsafe
+                                                    -> toJsUnsafe
                                                 );
                                         | None => ()    
                                     };
@@ -67,19 +68,19 @@ const factory = (propertyType: PropType$Shape) => {
                                         let unwrappedMap = Js.Dict.empty();
                                         ${shapeArgs.map(arg => arg.required ? `
                                             unwrappedMap
-                                                |. Js.Dict.set(
+                                                -> Js.Dict.set(
                                                     "${arg.key}",
-                                                    ${arg.wrapJs(`obj |. ${arg.keySafe}`)}
-                                                    |. toJsUnsafe
+                                                    ${arg.wrapJs(`obj -> ${arg.keySafe}Get`)}
+                                                    -> toJsUnsafe
                                                 );
                                         ` : `
-                                            switch (${arg.wrapJs(`obj |. ${arg.keySafe}`)}) {
+                                            switch (${arg.wrapJs(`obj -> ${arg.keySafe}Get`)}) {
                                                 | Some(v) =>
                                                     unwrappedMap
-                                                        |. Js.Dict.set(
+                                                        -> Js.Dict.set(
                                                             "${arg.key}",
                                                             v
-                                                            |. toJsUnsafe
+                                                            -> toJsUnsafe
                                                         );
                                                 | None => ()    
                                             };
