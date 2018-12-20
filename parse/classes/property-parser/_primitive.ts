@@ -15,6 +15,12 @@ const factory = (propertyType: PropType$Primitive) => {
                     this._reasonType = 'string';
                     break;
 
+                // -- Date
+                case 'date':
+                case 'Date':
+                    this._reasonType = 'Js.Date.t';
+                    break;
+
                 // -- Boolean
                 case 'bool':
                 case 'boolean':

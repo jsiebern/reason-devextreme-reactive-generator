@@ -2,7 +2,7 @@
 import * as reactDocgen from 'react-docgen';
 import findComponents from './find-components';
 import findComponentDocs from './find-component-docs';
-import {existsSync, readFileSync} from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import * as path from 'path';
 import * as Console from './../parse/helpers/console';
 
@@ -11,9 +11,19 @@ const components = findComponents();
 const componentDocs = findComponentDocs();
 
 type apiListType = { [packageName: string]: ComponentSignature[] };
+type apiListLookup = Array<{
+    package: string;
+    basename: string,
+    importPath: string,
+    lookupKey: string,
+    lookupName: string,
+    lookupPackage: string,
+    passedComponents: string,
+}>;
 
 const getApis = (): apiListType => {
     const apis: apiListType = {};
+    const lookup: apiListLookup = [];
     Object.keys(components).forEach(key => {
         apis[key] = [];
         components[key].forEach(componentPath => {
@@ -26,16 +36,68 @@ const getApis = (): apiListType => {
             if (!src) {
                 return;
             }
-            let reactAPI;
-            try {
-                reactAPI = reactDocgen.parse(src);
-                reactAPI.basename = path.basename(componentPath);
-                reactAPI.importPath = `@devexpress/${key}`;
-                reactAPI.importName = reactAPI.displayName;
-                apis[key].push(reactAPI);
-            } catch (err) {
+
+            if (!src.includes('withComponents')) {
+                let reactAPI;
+                try {
+                    reactAPI = reactDocgen.parse(src);
+                    reactAPI.basename = path.basename(componentPath);
+                    reactAPI.importPath = `@devexpress/${key}`;
+                    reactAPI.importName = reactAPI.displayName;
+                    reactAPI.src = src;
+                    apis[key].push(reactAPI);
+                } catch (err) {
+                }
+            } else {
+                // With Component
+                const re = /withComponents\({([\s\S]*)}\)\(([a-zA-Z0-9]*)\)/;
+                const matches = re.exec(src);
+                if (matches) {
+                    const importAsRe = new RegExp(`import { ([a-zA-Z0-9]*) as ${matches[2].split('With')[0]}B?a?s?e? } from '(.*)';`);
+                    const importAsMatches = importAsRe.exec(src);
+                    if (importAsMatches) {
+                        lookup.push({
+                            package: key,
+                            basename: path.basename(componentPath),
+                            importPath: `@devexpress/${key}`,
+                            lookupKey: key,
+                            lookupName: importAsMatches[1],
+                            lookupPackage: importAsMatches[2],
+                            passedComponents: matches[1],
+                        });
+                    }
+                }
             }
         });
+    });
+    lookup.forEach(l => {
+        if (typeof apis[l.lookupKey].find(a => a.basename === l.basename) !== 'undefined') {
+            return;
+        }
+
+        const key = l.lookupPackage.replace('@devexpress/', '');
+        const getFrom = apis[key].find(api => api.importName === l.lookupName);
+        if (getFrom) {
+            const re = /\.components = ([\s\S]*);/i;
+            const matches = re.exec(getFrom.src || '');
+            if (!matches) {
+                return;
+            }
+            const components = Object.keys(eval(`(${matches[1]})`)).map(c => c.toLowerCase());
+            apis[l.lookupKey].push({
+                ...getFrom,
+                basename: l.basename,
+                importPath: l.importPath,
+                props: Object.keys(getFrom.props).reduce((prev, key) => {
+                    const prop = getFrom.props[key];
+                    prev[key] = {
+                        ...prop,
+                        required: !components.includes(key.toLowerCase()),
+                    };
+                    return prev;
+                }, {}),
+            });
+        }
     });
 
     return apis;
@@ -124,7 +186,7 @@ const mergeUiGrids = (apis: apiListType) => {
             if (from != null) {
                 component.props = Object.keys(from.props).reduce((obj, propKey) => {
                     const fromProp = from.props[propKey];
-                    if (component.props == null || component.props[propKey] == null) {
+                    if (component.props == null || component.props[propKey] == null || !component.props[propKey].required) {
                         fromProp.required = false;
                     }
                     return { ...obj, [propKey]: fromProp };

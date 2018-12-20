@@ -24,4 +24,5 @@ declare interface ComponentSignature {
         [propName: string]: PropSignature
     },
     basename?: string,
+    src?: string,
 }

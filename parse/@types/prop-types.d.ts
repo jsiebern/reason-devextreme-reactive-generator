@@ -1,5 +1,5 @@
 declare interface PropType$Primitive {
-    name: 'string' | 'number' | 'boolean' | 'bool' | 'int' | 'float' | 'any' | 'void' | 'Object' | 'String' | 'node' | 'object' | 'element' | 'any' | 'array' | 'Element' | 'ReactElement' | 'Element<any>' | 'Function' | 'Node' | 'ComponentType<object>'
+    name: 'Date' | 'date' | 'string' | 'number' | 'boolean' | 'bool' | 'int' | 'float' | 'any' | 'void' | 'Object' | 'String' | 'node' | 'object' | 'element' | 'any' | 'array' | 'Element' | 'ReactElement' | 'Element<any>' | 'Function' | 'Node' | 'ComponentType<object>'
 }
 
 declare interface PropType$Custom {

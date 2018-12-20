@@ -10,6 +10,8 @@ import analyse from './analyse-components';
 
 // Extract Packages
 const apis = analyse();
+// console.log(apis['dx-react-grid-material-ui']);
+// process.exit();
 
 // Write JSON files
 const outputDirectory = path.join(__dirname, '../', 'output', 'json');
